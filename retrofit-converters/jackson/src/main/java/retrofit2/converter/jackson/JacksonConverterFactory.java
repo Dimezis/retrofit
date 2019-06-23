@@ -15,10 +15,7 @@
  */
 package retrofit2.converter.jackson;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import okhttp3.RequestBody;
@@ -56,16 +53,12 @@ public final class JacksonConverterFactory extends Converter.Factory {
   @Override
   public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations,
       Retrofit retrofit) {
-    JavaType javaType = mapper.getTypeFactory().constructType(type);
-    ObjectReader reader = mapper.readerFor(javaType);
-    return new JacksonResponseBodyConverter<>(reader);
+    return new JacksonResponseBodyConverter<>(type, mapper);
   }
 
   @Override
   public Converter<?, RequestBody> requestBodyConverter(Type type,
       Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
-    JavaType javaType = mapper.getTypeFactory().constructType(type);
-    ObjectWriter writer = mapper.writerFor(javaType);
-    return new JacksonRequestBodyConverter<>(writer);
+    return new JacksonRequestBodyConverter<>(type, mapper);
   }
 }

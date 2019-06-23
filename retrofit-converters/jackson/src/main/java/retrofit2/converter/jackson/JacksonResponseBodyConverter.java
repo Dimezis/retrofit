@@ -15,20 +15,33 @@
  */
 package retrofit2.converter.jackson;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
+import javax.annotation.Nullable;
 
 final class JacksonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
-  private final ObjectReader adapter;
+  @Nullable
+  private ObjectReader adapter;
+  private final Type type;
+  private final ObjectMapper mapper;
 
-  JacksonResponseBodyConverter(ObjectReader adapter) {
-    this.adapter = adapter;
+  JacksonResponseBodyConverter(Type type, ObjectMapper mapper) {
+    this.type = type;
+    this.mapper = mapper;
   }
 
-  @Override public T convert(ResponseBody value) throws IOException {
+  @Override
+  public T convert(ResponseBody value) throws IOException {
     try {
+      if (adapter == null) {
+        JavaType javaType = mapper.getTypeFactory().constructType(type);
+        adapter = mapper.readerFor(javaType);
+      }
       return adapter.readValue(value.charStream());
     } finally {
       value.close();
